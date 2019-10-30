@@ -5,6 +5,7 @@ from threading import Thread
 from pony.orm import db_session, select
 from bs4 import BeautifulSoup
 from requests import get
+from random import randint
 from modules.database import User, Data
 
 
@@ -61,6 +62,7 @@ def reply(msg):
                                 "This is the <b>#TeamTrees Bot</b> :)\n"
                                 "Type /trees to see the current status.\n\n"
                                 "🌲 🌳 🌴 🎄 🍃 🌿 🌱".format(name), parse_mode="HTML")
+        bot.sendSticker(chatId, "AAQEAAN3AAPO4_wV6IoHGqrqB8v-arQbAAQBAAdtAAN8CwACFgQ")
 
     elif text == "/trees":
         trees = data.trees
@@ -72,6 +74,13 @@ def reply(msg):
                                 "🌳 Final Goal: <b>{:,}</b> trees\n\n"
                                 "🌲 teamtrees.org".format(trees, round(trees*100/total, 2), remaining,
                                                           round(remaining*100/total, 2), total), parse_mode="HTML")
+
+    elif text == "/stickers":
+        stickList = ["AAQEAANyAAPO4_wVv76b0dfqmuB426AbAAQBAAdtAANaigACFgQ", "AAQEAANzAAPO4_wVy-qJ57NoNTw0MqIbAAQBAAdtAAP5WQACFgQ",
+                     "AAQEAAN0AAPO4_wVSo7swka7ZZxWbZ8bAAQBAAdtAANIXQACFgQ", "AAQEAAN1AAPO4_wVfUpiX0xZ4mRpDaIbAAQBAAdtAAMMgAACFgQ",
+                     "AAQEAAN6AAPO4_wVcjdoahxxsFgy-KAbAAQBAAdtAAOlZAACFgQ", "AAQEAAN2AAPO4_wVzD1Tbi26aERBdJ8bAAQBAAdtAAN4VwACFgQ"]
+        ind = randint(0, 6)
+        bot.sendSticker(chatId, stickList[ind])
 
 
 def accept_msgs(msg):
