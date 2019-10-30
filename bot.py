@@ -69,9 +69,9 @@ def reply(msg):
         bot.sendMessage(chatId, "<b>#TeamTrees Status</b>\n\n"
                                 "🌱 Trees Planted: <b>{:,} ({}%)</b>\n"
                                 "🌿 Remaining: <b>{:,} ({}%)</b>\n"
-                                "🌳 Final Goal: <b>{:,}</b>\n\n"
-                                "🌲 teamtrees.org".format(trees, trees*100/total, remaining,
-                                                          remaining*100/total, total), parse_mode="HTML")
+                                "🌳 Final Goal: <b>{:,}</b> trees\n\n"
+                                "🌲 teamtrees.org".format(trees, round(trees*100/total, 2), remaining,
+                                                          round(remaining*100/total, 2), total), parse_mode="HTML")
 
 
 def accept_msgs(msg):
