@@ -4,7 +4,8 @@ db = Database("sqlite", "../teamtreesbot.db", create_db=True)
 
 
 class Chat(db.Entity):
-    chatId = Required(int, sql_type='BIGINT')
+    chatId = Required(int)
+    isGroup = Required(bool, default=False)
 
 
 class Data(db.Entity):

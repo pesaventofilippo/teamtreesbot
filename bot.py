@@ -41,7 +41,8 @@ def sendUpdates():
     if currentGoal > data.lastGoal:
         for chat in select(c for c in Chat)[:]:
             try:
-                bot.sendMessage(chat.chatId, "🌲 #TeamTrees just reached <b>{:,} trees!</b>".format(currentGoal), parse_mode="HTML")
+                chatId = chat.chatId if not chat.isGroup else int("-100" + str(chat.chatId))
+                bot.sendMessage(chatId, "🌲 #TeamTrees just reached <b>{:,} trees!</b>".format(currentGoal), parse_mode="HTML")
             except (BotWasBlockedError, BotWasKickedError):
                 chat.delete()
             except TelegramError:
@@ -56,9 +57,11 @@ def reply(msg):
     text = msg['text'].replace('@' + bot.getMe()['username'], "")
     data = Data.get(id=0)
 
-    if not Chat.exists(lambda c: c.chatId == chatId):
-        Chat(chatId=chatId)
-    chat = Chat.get(chatId=chatId)
+    safeChatId = chatId if chatId > 0 else int(str(chatId)[:4])
+
+    if not Chat.exists(lambda c: c.chatId == safeChatId):
+        Chat(chatId=safeChatId, isGroup=chatId<0)
+    chat = Chat.get(chatId=safeChatId)
 
     if text == "/start":
         bot.sendMessage(chatId, "Hey, <b>{}</b> 👋🏻\n"
