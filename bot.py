@@ -19,6 +19,7 @@ except FileNotFoundError:
     f.close()
 
 bot = Bot(token)
+goalInterval = 500000
 
 
 @db_session
@@ -35,14 +36,14 @@ def fetchData():
 @db_session
 def sendUpdates():
     data = Data.get(id=0)
-    currentGoal = data.trees - data.trees % 500000
+    currentGoal = data.trees - data.trees % goalInterval
     if currentGoal > data.lastGoal:
         for user in select(u for u in User)[:]:
             try:
-                bot.sendMessage(user.chatId, "🌲 #TeamTrees just reached {:,} trees!".format(currentGoal), parse_mode="HTML")
+                bot.sendMessage(user.chatId, "🌲 #TeamTrees just reached <b>{:,} trees!</b>".format(currentGoal), parse_mode="HTML")
             except (TelegramError, BotWasBlockedError):
                 pass
-        data.lastGoal = currentGoal
+    data.lastGoal = currentGoal
 
 @db_session
 def reply(msg):
@@ -57,16 +58,20 @@ def reply(msg):
 
     if text == "/start":
         bot.sendMessage(chatId, "Hey, <b>{}</b> 👋🏻\n"
-                                "This is the #TeamTrees Bot :)\n"
-                                "Type /trees to see the current status.\n"
+                                "This is the <b>#TeamTrees Bot</b> :)\n"
+                                "Type /trees to see the current status.\n\n"
                                 "🌲 🌳 🌴 🎄 🍃 🌿 🌱".format(name), parse_mode="HTML")
 
     elif text == "/trees":
+        trees = data.trees
+        total = data.total
+        remaining = total - trees
         bot.sendMessage(chatId, "<b>#TeamTrees Status</b>\n\n"
-                                "🌱 Trees Planted: <b>{:,}</b>\n"
+                                "🌱 Trees Planted: <b>{:,} ({}%)</b>\n"
                                 "🌿 Remaining: <b>{:,} ({}%)</b>\n"
-                                "🌳 Final Goal: <b>2,000,000</b>\n\n"
-                                "🌲 teamtrees.org".format(data.trees, 2000000 - data.trees, data.trees*100/2000000), parse_mode="HTML")
+                                "🌳 Final Goal: <b>{:,}</b>\n\n"
+                                "🌲 teamtrees.org".format(trees, trees*100/total, remaining,
+                                                          remaining*100/total, total), parse_mode="HTML")
 
 
 def accept_msgs(msg):
