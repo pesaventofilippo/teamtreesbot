@@ -29,7 +29,7 @@ def fetchData():
         Data(id=0)
     data = Data.get(id=0)
     res = get('https://www.teamtrees.org/')
-    soup = BeautifulSoup(res.content)
+    soup = BeautifulSoup(res.content, "html.parser")
     trees = int(soup.find(id="totalTrees").get_attribute_list("data-count")[0])
     data.trees = trees
 
@@ -62,7 +62,7 @@ def reply(msg):
                                 "This is the <b>#TeamTrees Bot</b> :)\n"
                                 "Type /trees to see the current status.\n\n"
                                 "🌲 🌳 🌴 🎄 🍃 🌿 🌱".format(name), parse_mode="HTML")
-        bot.sendSticker(chatId, "AAQEAAN3AAPO4_wV6IoHGqrqB8v-arQbAAQBAAdtAAN8CwACFgQ")
+        bot.sendSticker(chatId, "CAADBAADdwADzuP8FeiKBxqq6gfLFgQ")
 
     elif text == "/trees":
         trees = data.trees
@@ -76,9 +76,9 @@ def reply(msg):
                                                           round(remaining*100/total, 2), total), parse_mode="HTML")
 
     elif text == "/stickers":
-        stickList = ["AAQEAANyAAPO4_wVv76b0dfqmuB426AbAAQBAAdtAANaigACFgQ", "AAQEAANzAAPO4_wVy-qJ57NoNTw0MqIbAAQBAAdtAAP5WQACFgQ",
-                     "AAQEAAN0AAPO4_wVSo7swka7ZZxWbZ8bAAQBAAdtAANIXQACFgQ", "AAQEAAN1AAPO4_wVfUpiX0xZ4mRpDaIbAAQBAAdtAAMMgAACFgQ",
-                     "AAQEAAN6AAPO4_wVcjdoahxxsFgy-KAbAAQBAAdtAAOlZAACFgQ", "AAQEAAN2AAPO4_wVzD1Tbi26aERBdJ8bAAQBAAdtAAN4VwACFgQ"]
+        stickList = ["CAADBAADcgADzuP8Fb--m9HX6prgFgQ", "CAADBAADcwADzuP8FcvqieezaDU8FgQ",
+                     "CAADBAADdAADzuP8FUqO7MJGu2WcFgQ", "CAADBAADdQADzuP8FX1KYl9MWeJkFgQ",
+                     "CAADBAADegADzuP8FXI3aGoccbBYFgQ", "CAADBAADdgADzuP8Fcw9U24tumhEFgQ"]
         ind = randint(0, 6)
         bot.sendSticker(chatId, stickList[ind])
 
