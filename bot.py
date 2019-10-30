@@ -1,12 +1,12 @@
 from telepot import Bot
-from telepot.exception import TelegramError, BotWasBlockedError
+from telepot.exception import TelegramError, BotWasBlockedError, BotWasKickedError
 from time import sleep
 from threading import Thread
 from pony.orm import db_session, select
 from bs4 import BeautifulSoup
 from requests import get
 from random import randint
-from modules.database import User, Data
+from modules.database import Chat, Data
 
 
 try:
@@ -39,23 +39,26 @@ def sendUpdates():
     data = Data.get(id=0)
     currentGoal = data.trees - data.trees % goalInterval
     if currentGoal > data.lastGoal:
-        for user in select(u for u in User)[:]:
+        for chat in select(c for c in Chat)[:]:
             try:
-                bot.sendMessage(user.chatId, "🌲 #TeamTrees just reached <b>{:,} trees!</b>".format(currentGoal), parse_mode="HTML")
-            except (TelegramError, BotWasBlockedError):
+                bot.sendMessage(chat.chatId, "🌲 #TeamTrees just reached <b>{:,} trees!</b>".format(currentGoal), parse_mode="HTML")
+            except (BotWasBlockedError, BotWasKickedError):
+                chat.delete()
+            except TelegramError:
                 pass
     data.lastGoal = currentGoal
 
+
 @db_session
 def reply(msg):
-    chatId = msg['from']['id']
+    chatId = msg['chat']['id']
     name = msg['from']['first_name']
     text = msg['text'].replace('@' + bot.getMe()['username'], "")
     data = Data.get(id=0)
 
-    if not User.exists(lambda u: u.chatId == chatId):
-        User(chatId=chatId)
-    user = User.get(chatId=chatId)
+    if not Chat.exists(lambda c: c.chatId == chatId):
+        Chat(chatId=chatId)
+    chat = Chat.get(chatId=chatId)
 
     if text == "/start":
         bot.sendMessage(chatId, "Hey, <b>{}</b> 👋🏻\n"
@@ -79,12 +82,13 @@ def reply(msg):
         stickList = ["CAADBAADcgADzuP8Fb--m9HX6prgFgQ", "CAADBAADcwADzuP8FcvqieezaDU8FgQ",
                      "CAADBAADdAADzuP8FUqO7MJGu2WcFgQ", "CAADBAADdQADzuP8FX1KYl9MWeJkFgQ",
                      "CAADBAADegADzuP8FXI3aGoccbBYFgQ", "CAADBAADdgADzuP8Fcw9U24tumhEFgQ"]
-        ind = randint(0, 6)
+        ind = randint(0, 5)
         bot.sendSticker(chatId, stickList[ind])
 
 
 def accept_msgs(msg):
     Thread(target=reply, args=[msg]).start()
+
 
 bot.message_loop({'chat': accept_msgs})
 

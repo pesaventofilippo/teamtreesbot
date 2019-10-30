@@ -3,8 +3,8 @@ from pony.orm import Database, Required, Optional
 db = Database("sqlite", "../teamtreesbot.db", create_db=True)
 
 
-class User(db.Entity):
-    chatId = Required(int)
+class Chat(db.Entity):
+    chatId = Required(int, sql_type='BIGINT')
 
 
 class Data(db.Entity):
