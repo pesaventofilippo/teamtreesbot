@@ -1,12 +1,12 @@
 from telepot import Bot
 from telepot.exception import TelegramError, BotWasBlockedError, BotWasKickedError
-from time import sleep
-from threading import Thread
 from pony.orm import db_session, select
 from bs4 import BeautifulSoup
 from requests import get
-from random import randint
 from datetime import datetime
+from threading import Thread
+from random import randint
+from time import sleep
 from modules.database import Chat, Data, Message
 
 
@@ -67,11 +67,11 @@ def createMessage():
               "🌱 Trees Planted: <b>{:,} ({}%)</b>\n" \
               "🌿 Remaining: <b>{:,} ({}%)</b>\n" \
               "🌳 Final Goal: <b>{:,} trees</b>\n\n" \
-              "📆 Days In: <b>{} ({}%)</b>\n" \
-              "🕙 Remaining: <b>{} days</b>\n\n" \
+              "📆 Days Passed: <b>{} days ({}%)</b>\n" \
+              "🕙 Remaining: <b>{} days ({}%)</b>\n\n" \
               "🌲 teamtrees.org".format(trees, round(trees * 100 / totalTrees, 1), remainingTrees,
-                                        round(remainingTrees * 100 / totalTrees, 1), totalTrees,
-                                        days, round(days * 100 / totalDays, 1), remainingDays)
+                                        round(remainingTrees * 100 / totalTrees, 1), totalTrees, days,
+                                        round(days * 100 / totalDays, 1), remainingDays, round(remainingDays * 100 / totalDays, 1))
 
 
 @db_session
