@@ -6,7 +6,8 @@ from pony.orm import db_session, select
 from bs4 import BeautifulSoup
 from requests import get
 from random import randint
-from modules.database import Chat, Data
+from datetime import datetime
+from modules.database import Chat, Data, Message
 
 
 try:
@@ -20,7 +21,6 @@ except FileNotFoundError:
     f.close()
 
 bot = Bot(token)
-goalInterval = 500000
 
 
 @db_session
@@ -28,7 +28,7 @@ def fetchData():
     if not Data.exists(lambda d: d.id == 0):
         Data(id=0)
     data = Data.get(id=0)
-    res = get('https://www.teamtrees.org/')
+    res = get('https://www.teamtrees.org')
     soup = BeautifulSoup(res.content, "html.parser")
     trees = int(soup.find(id="totalTrees").get_attribute_list("data-count")[0])
     data.trees = trees
@@ -37,6 +37,7 @@ def fetchData():
 @db_session
 def sendUpdates():
     data = Data.get(id=0)
+    goalInterval = 500000
     currentGoal = data.trees - data.trees % goalInterval
     if currentGoal > data.lastGoal:
         for chat in select(c for c in Chat)[:]:
@@ -51,35 +52,51 @@ def sendUpdates():
 
 
 @db_session
+def createMessage():
+    if not Message.exists(lambda m: m.id == 0):
+        Message(id=0)
+    message = Message.get(id=0)
+    data = Data.get(id=0)
+    trees = data.trees
+    totalTrees = 20000000
+    remainingTrees = totalTrees - trees
+    days = (datetime.now() - datetime(2019,10,25)).days
+    totalDays = 68
+    remainingDays = totalDays - days
+    message.trees = "<b>#TeamTrees Status</b>\n\n" \
+              "🌱 Trees Planted: <b>{:,} ({}%)</b>\n" \
+              "🌿 Remaining: <b>{:,} ({}%)</b>\n" \
+              "🌳 Final Goal: <b>{:,} trees</b>\n\n" \
+              "📆 Days In: <b>{} ({}%)</b>\n" \
+              "🕙 Remaining: <b>{} days</b>\n\n" \
+              "🌲 teamtrees.org".format(trees, round(trees * 100 / totalTrees, 1), remainingTrees,
+                                        round(remainingTrees * 100 / totalTrees, 1), totalTrees,
+                                        days, round(days * 100 / totalDays, 1), remainingDays)
+
+
+@db_session
 def reply(msg):
     chatId = msg['chat']['id']
     name = msg['from']['first_name']
     text = msg['text'].replace('@' + bot.getMe()['username'], "")
     data = Data.get(id=0)
+    message = Message.get(id=0)
 
-    safeChatId = chatId if chatId > 0 else int(str(chatId)[:4])
+    safeChatId = chatId if chatId > 0 else int(str(chatId)[4:])
 
     if not Chat.exists(lambda c: c.chatId == safeChatId):
         Chat(chatId=safeChatId, isGroup=chatId<0)
     chat = Chat.get(chatId=safeChatId)
 
     if text == "/start":
-        bot.sendMessage(chatId, "Hey, <b>{}</b> 👋🏻\n"
-                                "This is the <b>#TeamTrees Bot</b> :)\n"
-                                "Type /trees to see the current status.\n\n"
+        bot.sendMessage(chatId, "Hey, <b>{}</b>!\n"
+                                "This is the <b>#TeamTrees Bot</b> 👋🏻\n"
+                                "Type /trees to see the current status, or /stickers to get the stickers pack.\n\n"
                                 "🌲 🌳 🌴 🎄 🍃 🌿 🌱".format(name), parse_mode="HTML")
         bot.sendSticker(chatId, "CAADBAADdwADzuP8FeiKBxqq6gfLFgQ")
 
     elif text == "/trees":
-        trees = data.trees
-        total = data.total
-        remaining = total - trees
-        bot.sendMessage(chatId, "<b>#TeamTrees Status</b>\n\n"
-                                "🌱 Trees Planted: <b>{:,} ({}%)</b>\n"
-                                "🌿 Remaining: <b>{:,} ({}%)</b>\n"
-                                "🌳 Final Goal: <b>{:,}</b> trees\n\n"
-                                "🌲 teamtrees.org".format(trees, round(trees*100/total, 2), remaining,
-                                                          round(remaining*100/total, 2), total), parse_mode="HTML")
+        bot.sendMessage(chatId, message.trees, parse_mode="HTML")
 
     elif text == "/stickers":
         stickList = ["CAADBAADcgADzuP8Fb--m9HX6prgFgQ", "CAADBAADcwADzuP8FcvqieezaDU8FgQ",
@@ -98,4 +115,5 @@ bot.message_loop({'chat': accept_msgs})
 while True:
     fetchData()
     sendUpdates()
-    sleep(60)
+    createMessage()
+    sleep(20)
