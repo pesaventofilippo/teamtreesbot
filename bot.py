@@ -63,6 +63,8 @@ def createMessage():
     days = (datetime.now() - datetime(2019,10,25)).days
     totalDays = 68
     remainingDays = totalDays - days
+    remainingTrees = max(0, remainingTrees)
+    remainingDays = max(0, remainingDays)
     message.trees = "<b>#TeamTrees Status</b>\n\n" \
               "🌱 Trees Planted: <b>{:,} ({}%)</b>\n" \
               "🌿 Remaining: <b>{:,} ({}%)</b>\n" \
