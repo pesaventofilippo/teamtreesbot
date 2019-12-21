@@ -37,16 +37,13 @@ def fetchData():
 @db_session
 def sendUpdates():
     data = Data.get(id=0)
-    goalInterval = 100000
+    goalInterval = 1000000
     currentGoal = data.trees - data.trees % goalInterval
     if currentGoal > data.lastGoal:
         for chat in select(c for c in Chat)[:]:
             try:
                 chatId = chat.chatId if not chat.isGroup else int("-100" + str(chat.chatId))
-                if currentGoal != 20000000:
-                    bot.sendMessage(chatId, "🌲 #TeamTrees just reached <b>{:,} trees!</b>".format(currentGoal), parse_mode="HTML")
-                else:
-                    bot.sendMessage(chatId, "🌲 <b>BIG NEWS!</b>\n#TeamTrees just reached the final goal of <b>20,000,000 trees!</b>\n\nThank you to everyone who donated, head over to teamtrees.org to see the contributors!", parse_mode="HTML")
+                bot.sendMessage(chatId, "🌲 #TeamTrees just reached <b>{:,} trees!</b>".format(currentGoal), parse_mode="HTML")
             except (BotWasBlockedError, BotWasKickedError):
                 chat.delete()
             except TelegramError:
@@ -121,4 +118,4 @@ while True:
     fetchData()
     sendUpdates()
     createMessage()
-    sleep(20)
+    sleep(60)
