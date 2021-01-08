@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from requests import get
 from datetime import datetime
 from threading import Thread
-from random import randint
+from random import choice
 from time import sleep
 from modules.database import Chat, Data, Message
 
@@ -80,15 +80,15 @@ def createMessage():
 def reply(msg):
     chatId = msg['chat']['id']
     name = msg['from']['first_name']
-    text = msg['text'].replace('@' + bot.getMe()['username'], "")
-    data = Data.get(id=0)
+    if "text" in msg:
+        text = msg['text'].replace('@' + bot.getMe()['username'], "")
+    else:
+        text = ""
+
     message = Message.get(id=0)
-
     safeChatId = chatId if chatId > 0 else int(str(chatId)[4:])
-
     if not Chat.exists(lambda c: c.chatId == safeChatId):
         Chat(chatId=safeChatId, isGroup=chatId<0)
-    chat = Chat.get(chatId=safeChatId)
 
     if text == "/start":
         bot.sendMessage(chatId, "Hey, <b>{}</b>!\n"
@@ -104,13 +104,11 @@ def reply(msg):
         stickList = ["CAADBAADcgADzuP8Fb--m9HX6prgFgQ", "CAADBAADcwADzuP8FcvqieezaDU8FgQ",
                      "CAADBAADdAADzuP8FUqO7MJGu2WcFgQ", "CAADBAADdQADzuP8FX1KYl9MWeJkFgQ",
                      "CAADBAADegADzuP8FXI3aGoccbBYFgQ", "CAADBAADdgADzuP8Fcw9U24tumhEFgQ"]
-        ind = randint(0, 5)
-        bot.sendSticker(chatId, stickList[ind])
+        bot.sendSticker(chatId, choice(stickList))
 
 
 def accept_msgs(msg):
     Thread(target=reply, args=[msg]).start()
-
 
 bot.message_loop({'chat': accept_msgs})
 
