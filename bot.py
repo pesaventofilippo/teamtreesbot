@@ -1,5 +1,5 @@
-from telepot import Bot
-from telepot.exception import TelegramError, BotWasBlockedError, BotWasKickedError
+from telepotpro import Bot
+from telepotpro.exception import TelegramError, BotWasBlockedError, BotWasKickedError
 from pony.orm import db_session, select
 from bs4 import BeautifulSoup
 from requests import get
